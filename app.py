@@ -71,7 +71,7 @@ st.markdown("""
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Loading property database…")
 def load():
-    url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/master_villa_db.csv"
+    url = "https://raw.githubusercontent.com/nomanalhuraiz-web/jumeirah-park-lookup/main/master_villa_db.csv"
     df = pd.read_csv(url, low_memory=False)
     df['villa_number'] = df['villa_number'].astype(str).str.strip()
     return df
