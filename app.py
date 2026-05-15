@@ -132,10 +132,22 @@ SECTIONS = [
     ]),
 ]
 
-def fmt(val):
+# Fields that should NEVER get comma formatting
+NO_COMMA_FIELDS = {
+    '2022_telephone','2022_mobile','2022_email',
+    '2023_permit_number','2023_phone','2023_mobile','2023_email','2023_plot_number_dm',
+    '2024_buyer_mobile','2024_land_number',
+    '2025_buyer_mobile','2025_buyer_passport','2025_buyer_uae_id',
+    '2025_aprdec_phone1','2025_aprdec_mobile1',
+}
+
+def fmt(val, col=None):
     if val is None or (isinstance(val, float) and np.isnan(val)): return None
     s = str(val).strip()
     if s.lower() in ('nan','none','nat',''): return None
+    # Never format these fields as numbers with commas
+    if col in NO_COMMA_FIELDS:
+        return s
     try:
         f = float(s)
         return f"{int(f):,}" if f == int(f) else f"{f:,.2f}"
@@ -147,15 +159,15 @@ def render(row):
     pill_labels = {"p22":"2022","p23":"2023","p24":"2024","p25a":"2025 (Before Apr)","p25b":"2025 (Apr–Dec)"}
     pills = ""
     for yr, lbl, sc, hdc, yc, pc, fields in SECTIONS:
-        has = any(fmt(row.get(c)) is not None for c,_ in fields)
+        has = any(fmt(row.get(c), c) is not None for c,_ in fields)
         cls = pc if has else "pno"
         pills += f'<span class="pill {cls}">{pill_labels[pc]}</span>'
 
     cards = ""
     for yr, lbl, sc, hdc, yc, pc, fields in SECTIONS:
         rows = "".join(
-            f'<tr><td class="lbl">{fl}</td><td class="val">{fmt(row.get(col))}</td></tr>'
-            for col, fl in fields if fmt(row.get(col)) is not None
+            f'<tr><td class="lbl">{fl}</td><td class="val">{fmt(row.get(col), col)}</td></tr>'
+            for col, fl in fields if fmt(row.get(col), col) is not None
         )
         body = f'<table class="info-tbl">{rows}</table>' if rows else '<p class="nodata">No data for this period</p>'
         cards += f"""<div class="sec-card {sc}">
